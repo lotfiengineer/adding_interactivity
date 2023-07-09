@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import 'package:expense_tracker/models/expense.dart';
-import 'package:expense_tracker/widgets/expenses_list/expenses_list.dart';
 import 'package:expense_tracker/widgets/new_expense.dart';
+import 'package:expense_tracker/widgets/expenses_list/expenses_list.dart';
+import 'package:expense_tracker/models/expense.dart';
 import 'package:expense_tracker/widgets/chart/chart.dart';
 
 class Expenses extends StatefulWidget {
@@ -17,34 +17,36 @@ class Expenses extends StatefulWidget {
 class _ExpensesState extends State<Expenses> {
   final List<Expense> _registeredExpenses = [
     Expense(
-      title: 'Dubai (Private Jet)',
-      amount: 20000,
-      date: DateTime.now(),
-      category: Category.travel,
-    ),
-    Expense(
-      title: 'Conquering the earth',
-      amount: 10,
+      title: 'Flutter Course',
+      amount: 19.99,
       date: DateTime.now(),
       category: Category.work,
     ),
     Expense(
-      title: "Stake",
-      amount: 1000,
+      title: 'Cinema',
+      amount: 15.69,
       date: DateTime.now(),
-      category: Category.food,
+      category: Category.leisure,
     ),
   ];
 
-  void _addNewExpense(Expense newExpense) {
+  void _openAddExpenseOverlay() {
+    showModalBottomSheet(
+      useSafeArea: true,
+      isScrollControlled: true,
+      context: context,
+      builder: (ctx) => NewExpense(onAddExpense: _addExpense),
+    );
+  }
+
+  void _addExpense(Expense expense) {
     setState(() {
-      _registeredExpenses.add(newExpense);
+      _registeredExpenses.add(expense);
     });
   }
 
   void _removeExpense(Expense expense) {
     final expenseIndex = _registeredExpenses.indexOf(expense);
-
     setState(() {
       _registeredExpenses.remove(expense);
     });
@@ -52,9 +54,9 @@ class _ExpensesState extends State<Expenses> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         duration: const Duration(seconds: 3),
-        content: Text('Expense deleted.'),
+        content: const Text('Expense deleted.'),
         action: SnackBarAction(
-          label: "Undo",
+          label: 'Undo',
           onPressed: () {
             setState(() {
               _registeredExpenses.insert(expenseIndex, expense);
@@ -65,20 +67,12 @@ class _ExpensesState extends State<Expenses> {
     );
   }
 
-  void _openAddExpenseOverlay() {
-    showModalBottomSheet(
-      isScrollControlled: true,
-      context: context,
-      builder: (ctx) => NewExpense(
-        onAddExpense: _addNewExpense,
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    Widget mainContent = Center(
-      child: const Text("No expenses found. Start adding some!"),
+    final width = MediaQuery.of(context).size.width;
+
+    Widget mainContent = const Center(
+      child: Text('No expenses found. Start adding some!'),
     );
 
     if (_registeredExpenses.isNotEmpty) {
@@ -90,23 +84,33 @@ class _ExpensesState extends State<Expenses> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Mohammad is a GOD'),
+        title: const Text('Flutter ExpenseTracker'),
         actions: [
-          // Actions wants a list of widgets.
           IconButton(
             onPressed: _openAddExpenseOverlay,
             icon: const Icon(Icons.add),
           ),
         ],
       ),
-      body: Column(
-        children: [
-          Chart(expenses: _registeredExpenses),
-          Expanded(
-            child: mainContent,
-          ),
-        ],
-      ),
+      body: width < 600
+          ? Column(
+              children: [
+                Chart(expenses: _registeredExpenses),
+                Expanded(
+                  child: mainContent,
+                ),
+              ],
+            )
+          : Row(
+              children: [
+                Expanded(
+                  child: Chart(expenses: _registeredExpenses),
+                ),
+                Expanded(
+                  child: mainContent,
+                ),
+              ],
+            ),
     );
   }
 }

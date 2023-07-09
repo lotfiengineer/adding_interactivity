@@ -6,6 +6,7 @@ class ExpenseItem extends StatelessWidget {
 
   final Expense expense;
 
+
   Widget build(BuildContext context) {
     return Card(
         child: Padding(
